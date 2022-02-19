@@ -1,3 +1,4 @@
+$ProgressPreference = "SilentlyContinue"
 # https://docs.microsoft.com/en-us/powershell/module/packagemanagement/get-packageprovider?view=powershell-7.2
 #TLS Setting
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -21,10 +22,13 @@ If ($null -eq $ModuleLoaded) {
 	Install-Module PSWindowsUpdate -Force -AllowClobber | Out-Null
 }
 # Install-Module PSWindowsUpdate -Force 
-Import-Module -Name PSWindowsUpdate -Force -Global
+Import-Module -Name PSWindowsUpdate -DisableNameChecking -Force -Global
 
 #Check what updates are required for this server
 # Get-WindowsUpdate
 
+If (!(Test-Path C:\Assets)){ New-Item -ItemType Directory -Path C:\Assets | Out-Null } 
+
 #Accept and install all the updates that it's found are required
 Install-WindowsUpdate -AcceptAll -Install -MicrosoftUpdate -IgnoreReboot -RecurseCycle 2 -NotCategory "Drivers" | Out-File "C:\Assets\$env:Computername-$(Get-Date -f yyyy-MM-dd)-MSUpdates.log" -Force
+Start-Process -NoNewWindow "c:\windows\system32\UsoClient.exe" -argument "StartOobeAppsScan" -Wait
